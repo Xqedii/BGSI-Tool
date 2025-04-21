@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="pl">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>BGSI Tool</title>
+      <link href="./output.css" rel="stylesheet" />
+   </head>
+   <!DOCTYPE html>
+   <html lang="en">
+      <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>BGSI Tool</title>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+         <style>
+            body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            }
+            .sidebar-icon {
+            width: 24px;
+            height: 24px;
+            }
+            .graph-line {
+            stroke: #4ade80;
+            stroke-width: 2;
+            fill: none;
+            }
+            .graph-area {
+            fill: url(#gradient);
+            opacity: 0.2;
+            }
+            .card {
+            background-color: #212121;
+            border-radius: 10px;
+            }
+            .flame-icon {
+            background: linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%);
+            border-radius: 10px;
+            }
+            .toggle {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            }
+            .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            }
+            .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #484848;
+            transition: .4s;
+            border-radius: 24px;
+            }
+            .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            }
+            input:checked + .slider {
+            background-color: #5a5a5a;
+            }
+            input:checked + .slider:before {
+            transform: translateX(24px);
+            }
+            ::-webkit-scrollbar {
+            width: 8px;
+            }
+            ::-webkit-scrollbar-thumb {
+            background-color: #2e2e2e;
+            border-radius: 10px;
+            }
+            ::-webkit-scrollbar-track {
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            }
+            button.active {
+            background-color: #3a3a3a;
+            }
+            li > a.active {
+            background-color: #2e2e2e;
+            }
+            @keyframes fillStatusBar {
+            0% {
+            width: 0%;
+            }
+            100% {
+            width: 100%;
+            }
+            }
+            .status-bar-container {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background-color: #2e2e2e;
+            position: relative;
+            }
+            .status-bar {
+            width: 0%;
+            height: 8px;
+            border-radius: 4px;
+            background-color: transparent;
+            position: absolute;
+            top: 0;
+            left: 0;
+            }
+            input:-webkit-autofill,
+            input:-webkit-autofill:hover,
+            input:-webkit-autofill:focus,
+            input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #303030 inset !important;
+            -webkit-text-fill-color: white !important;
+            caret-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+            }
+            input:-moz-autofill,
+            input:-moz-autofill:focus {
+            background-color: #303030 !important;
+            color: white !important;
+            }
+            input[autocompleted],
+            input[autocomplete="on"] {
+            color: white !important;
+            }
+            #server-ip {
+            color: white !important;
+            }
+            @keyframes loadingAnimation {
+            0% {
+            left: -100%;
+            }
+            100% {
+            left: 100%;
+            }
+            }
+            .animate-loading {
+            animation: loadingAnimation 1.5s infinite linear;
+            }
+            .dropdown {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+            }
+            .dropdown-btn {
+            background-color: #212121;
+            color: white;
+            padding: 10px;
+            border: 1px solid #3f3f3f;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            }
+            .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #212121;
+            border: 1px solid #3f3f3f;
+            border-radius: 8px;
+            z-index: 1;
+            width: 100%;
+            max-height: 320px;
+            overflow-y: auto;
+            }
+            .dropdown-option {
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+            margin-right: 5px;
+            margin-left: 5px;
+            padding-right: 20px;
+            text-align: center;
+            transition: background-color 150ms ease;
+            }
+            .dropdown-option:hover {
+            background-color: #2e2e2e;
+            }
+            .dropdown-option.selected {
+            background-color: rgb(61, 61, 61);
+            }
+            .dropdown-option.disabled {
+            color: #666;
+            cursor: not-allowed;
+            }
+            .dropdown-option.disabled:hover {
+            background-color: inherit;
+            }
+            .show {
+            display: block;
+            }
+            .dropdown-separator {
+            font-style: italic;
+            text-align: center;
+            }
+         </style>
+      </head>
+      <body class="">
+         <div class="flex h-[100vh] p-6">
+            <div class="w-72 p-6 flex flex-col card">
+               <div class="flex items-center mb-6">
+                  <img src="icons/logo.png" alt="Logo" class="w-10 h-10 mr-3 rounded-lg" />
+                  <div>
+                     <div class="font-bold text-white">BGSI Tool</div>
+                     <div class="text-xs text-gray-400">Created by Xqedii</div>
+                  </div>
+               </div>
+               <div class="mb-6">
+                  <div class="bg-[#2e2e2e] rounded-lg px-3 py-2 flex items-center">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                     </svg>
+                     <input id="search-input" type="text" placeholder="Search..." class="bg-transparent border-none focus:outline-none text-sm w-full text-gray-300">
+                  </div>
+               </div>
+               <nav class="flex-1">
+                  <ul class="space-y-2">
+                     <li>
+                        <a href="#" id="dashboard" class="sidebar-link active sidebar-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                           </svg>
+                           <span>Dashboard</span>
+                        </a>
+                     </li>
+                     <li>
+                        <a href="#" id="auto-enchant" class="sidebar-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="currentColor" viewBox="0 0 24 24" stroke="none">
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M23 4C23 3.11596 21.855 2.80151 21.0975 2.59348C21.0279 2.57437 20.9616 2.55615 20.8997 2.53848C19.9537 2.26818 18.6102 2 17 2C15.2762 2 13.8549 2.574 12.8789 3.13176C12.7296 3.21707 12.5726 3.33492 12.4307 3.44143C12.2433 3.58215 12.0823 3.70308 12 3.70308C11.9177 3.70308 11.7567 3.58215 11.5693 3.44143C11.4274 3.33492 11.2704 3.21707 11.1211 3.13176C10.1451 2.574 8.72378 2 7 2C5.38978 2 4.0463 2.26818 3.10028 2.53848C3.04079 2.55547 2.97705 2.57302 2.91016 2.59144C2.156 2.79911 1 3.11742 1 4V17C1 17.3466 1.17945 17.6684 1.47427 17.8507C1.94329 18.1405 2.56224 17.8868 3.11074 17.662C3.30209 17.5835 3.48487 17.5086 3.64972 17.4615C4.4537 17.2318 5.61022 17 7 17C8.2613 17 9.20554 17.4161 9.9134 17.8517C10.0952 17.9636 10.279 18.1063 10.4676 18.2527C10.9338 18.6148 11.4298 19 12 19C12.5718 19 13.0653 18.6162 13.5307 18.2543C13.7195 18.1074 13.9037 17.9642 14.0866 17.8517C14.7945 17.4161 15.7387 17 17 17C18.3898 17 19.5463 17.2318 20.3503 17.4615C20.5227 17.5108 20.7099 17.5898 20.9042 17.6719C21.4443 17.9 22.0393 18.1513 22.5257 17.8507C22.8205 17.6684 23 17.3466 23 17V4ZM3.33252 4.55749C3.13163 4.62161 3 4.81078 3 5.02166V14.8991C3 15.233 3.32089 15.4733 3.64547 15.3951C4.53577 15.1807 5.67777 15 7 15C8.76309 15 10.0794 15.5994 11 16.1721V5.45567C10.7989 5.29593 10.5037 5.08245 10.1289 4.86824C9.35493 4.426 8.27622 4 7 4C5.41509 4 4.12989 4.30297 3.33252 4.55749ZM17 15C15.2369 15 13.9206 15.5994 13 16.1721V5.45567C13.2011 5.29593 13.4963 5.08245 13.8711 4.86824C14.6451 4.426 15.7238 4 17 4C18.5849 4 19.8701 4.30297 20.6675 4.55749C20.8684 4.62161 21 4.81078 21 5.02166V14.8991C21 15.233 20.6791 15.4733 20.3545 15.3951C19.4642 15.1807 18.3222 15 17 15Z"/>
+                              <path d="M2.08735 20.4087C1.86161 19.9047 2.08723 19.3131 2.59127 19.0873C3.05951 18.8792 3.54426 18.7043 4.0318 18.5478C4.84068 18.2883 5.95911 18 7 18C8.16689 18 9.16285 18.6289 9.88469 19.0847C9.92174 19.1081 9.95807 19.131 9.99366 19.1534C10.8347 19.6821 11.4004 20 12 20C12.5989 20 13.1612 19.6829 14.0012 19.1538C14.0357 19.1321 14.0708 19.1099 14.1066 19.0872C14.8291 18.6303 15.8257 18 17 18C18.0465 18 19.1647 18.2881 19.9732 18.548C20.6992 18.7814 21.2378 19.0122 21.3762 19.073C21.8822 19.2968 22.1443 19.8943 21.9118 20.4105C21.6867 20.9106 21.0859 21.1325 20.5874 20.9109C20.1883 20.7349 19.7761 20.5855 19.361 20.452C18.6142 20.2119 17.7324 20 17 20C16.4409 20 15.9037 20.3186 15.0069 20.8841C14.2635 21.3529 13.2373 22 12 22C10.7619 22 9.73236 21.3521 8.98685 20.8829C8.08824 20.3173 7.55225 20 7 20C6.27378 20 5.39222 20.2117 4.64287 20.4522C4.22538 20.5861 3.80974 20.7351 3.4085 20.9128C2.9045 21.1383 2.31305 20.9127 2.08735 20.4087Z"/>
+                           </svg>
+                           <span>Auto Enchant</span>
+                        </a>
+                     </li>
+                     <li>
+                        <a href="#" id="egg-calculator" class="sidebar-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 " fill="none" viewBox="0 0 24 24" stroke="none">
+                              <path d="M1 2C1 1.44772 1.44772 1 2 1C2.55228 1 3 1.44772 3 2V20C3 20.5523 3.44771 21 4 21L22 21C22.5523 21 23 21.4477 23 22C23 22.5523 22.5523 23 22 23H3C1.89543 23 1 22.1046 1 21V2Z" fill="#9ca3af"/>
+                              <path d="M19.9285 5.37139C20.1336 4.85861 19.8842 4.27664 19.3714 4.07152C18.8586 3.86641 18.2766 4.11583 18.0715 4.62861L14.8224 12.7513C14.6978 13.0628 14.3078 13.1656 14.0459 12.9561L11.0811 10.5843C10.3619 10.0089 9.29874 10.2116 8.84174 11.0114L5.13176 17.5039C4.85775 17.9834 5.02434 18.5942 5.50386 18.8682C5.98338 19.1423 6.59423 18.9757 6.86824 18.4961L9.9982 13.0187C10.1505 12.7521 10.5049 12.6846 10.7447 12.8764L13.849 15.3598C14.635 15.9886 15.805 15.6802 16.1788 14.7456L19.9285 5.37139Z" fill="#9ca3af"/>
+                           </svg>
+                           <span>Calculator</span>
+                        </a>
+                     </li>
+                     <li>
+                        <a href="#" id="fast-hatch" class="sidebar-link flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all" style="border: 2px solid rgba(32, 155, 255, 1); transition: border-color 0.5s ease-in-out;">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="currentColor" viewBox="85 7678 20 22" stroke="none">
+                              <path transform="translate(1, 0)" d="M94,7697 C90.692,7697 88,7694.308 88,7691 C88,7686.268 91.39,7681 93.688,7681 C96.539,7681 100,7687.241 100,7691 C100,7694.308 97.308,7697 94,7697 M93.688,7679 C89.27,7679 86,7686.582 86,7691 C86,7695.418 89.582,7699 94,7699 C98.418,7699 102,7695.418 102,7691 C102,7686.582 98.106,7679 93.688,7679" id="egg-[#86]"></path>
+                           </svg>
+                           <span>Fast Hatch</span>
+                        </a>
+                     </li>
+                     <script>
+                        const searchInput = document.getElementById('search-input');
+                        const links = document.querySelectorAll('.sidebar-link');
+                        
+                        searchInput.addEventListener('input', () => {
+                          const value = searchInput.value.toLowerCase();
+                        
+                          links.forEach(link => {
+                            const text = link.textContent.toLowerCase();
+                            const listItem = link.closest('li');
+                        
+                            if (text.includes(value)) {
+                              listItem.style.display = '';
+                            } else {
+                              listItem.style.display = 'none';
+                            }
+                          });
+                        });
+                     </script>
+                     <script>
+                        document.addEventListener('DOMContentLoaded', () => {
+                          const sidebarLinks = document.querySelectorAll('.sidebar-link');
+                        
+                          sidebarLinks.forEach(link => {
+                            link.addEventListener('click', (e) => {
+                              e.preventDefault();
+                              const clickedButton = e.target.closest('.sidebar-link');
+                              if (clickedButton.id == "dashboard") {
+                                document.getElementById('card-gamestatus').classList.remove('hidden');
+                                document.getElementById('card-eggcalcresult').classList.add('hidden');
+                                document.getElementById('card-autoenchant').classList.add('hidden');
+                                document.getElementById('card-eggcalculator').classList.add('hidden');
+                                document.getElementById('card-fasthatch').classList.add('hidden');
+                              }
+                              if (clickedButton.id == "auto-enchant") {
+                                document.getElementById('card-gamestatus').classList.add('hidden');
+                                document.getElementById('card-eggcalcresult').classList.add('hidden');
+                                document.getElementById('card-autoenchant').classList.remove('hidden');
+                                document.getElementById('card-eggcalculator').classList.add('hidden');
+                                document.getElementById('card-fasthatch').classList.add('hidden');
+                              }
+                              if (clickedButton.id == "egg-calculator") {
+                                document.getElementById('card-gamestatus').classList.add('hidden');
+                                document.getElementById('card-eggcalcresult').classList.add('hidden');
+                                document.getElementById('card-autoenchant').classList.add('hidden');
+                                document.getElementById('card-eggcalculator').classList.remove('hidden');
+                                document.getElementById('card-fasthatch').classList.add('hidden');
+                              }
+                              if (clickedButton.id == "fast-hatch") {
+                                document.getElementById('card-gamestatus').classList.add('hidden');
+                                document.getElementById('card-eggcalcresult').classList.add('hidden');
+                                document.getElementById('card-autoenchant').classList.add('hidden');
+                                document.getElementById('card-eggcalculator').classList.add('hidden');
+                                document.getElementById('card-fasthatch').classList.remove('hidden');
+                              }
+                              sidebarLinks.forEach(l => l.classList.remove('active'));
+                              clickedButton.classList.add('active');
+                            });
+                          });
+                        });
+                     </script>
+                  </ul>
+               </nav>
+               <!-- Settings Popup -->
+               <div id="settings-popup" class="fixed inset-0 bg-black opacity-0 pointer-events-none transition-opacity duration-150 ease-in-out items-center justify-center z-50 flex">
+                  <div class="card p-6">
+                     <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold mb-2 text-center">Settings</h1>
+                     <p class="text-gray-400 mb-6 text-center">BGSI Tool settings menu</p>
+                     <nav class="flex-1">
+                     <ul class="space-y-2">
+                        <li>
+                           <a href="#" class="bg-[#2e2e2e] flex items-center px-4 py-3 text-gray-300 rounded-lg duration-150 all">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.4721 16.7023C17.3398 18.2608 15.6831 19.3584 13.8064 19.7934C11.9297 20.2284 9.95909 19.9716 8.25656 19.0701C6.55404 18.1687 5.23397 16.6832 4.53889 14.8865C3.84381 13.0898 3.82039 11.1027 4.47295 9.29011C5.12551 7.47756 6.41021 5.96135 8.09103 5.02005C9.77184 4.07875 11.7359 3.77558 13.6223 4.16623C15.5087 4.55689 17.1908 5.61514 18.3596 7.14656C19.5283 8.67797 20.1052 10.5797 19.9842 12.5023M19.9842 12.5023L21.4842 11.0023M19.9842 12.5023L18.4842 11.0023" />
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8V12L15 15" />
+                              </svg>
+                              <div class="flex flex-col flex-grow mr-6">
+                                 <span>Update Stats</span>
+                                 <small class="text-xs text-gray-400">Updates server stats every 30 seconds</small>
+                              </div>
+                              <label class="toggle ml-auto">
+                              <input type="checkbox" unchecked>
+                              <span class="slider"></span>
+                              </label>
+                           </a>
+                        </li>
+                        <li>
+                           <a href="#" class="bg-[#2e2e2e] flex items-center px-4 py-3 text-gray-300 rounded-lg duration-150 all">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                              </svg>
+                              <div class="flex flex-col flex-grow mr-6">
+                                 <span>Display Ping</span>
+                                 <small class="text-xs text-gray-400">Display last ping on Last Stats</small>
+                              </div>
+                              <label class="toggle ml-auto">
+                              <input type="checkbox" unchecked>
+                              <span class="slider"></span>
+                              </label>
+                           </a>
+                        </li>
+                     </ul>
+                     <div class=" my-6 border-t border-[#3f3f3f]"></div>
+                     <div class="flex justify-center mt-4">
+                        <button id="close-popup" class="bg-[#1ea54c] hover:bg-[#24c95d] text-white px-4 py-2 rounded-lg transition duration-150">
+                        Save Settings
+                        </button>
+                     </div>
+                  </div>
+               </div>
+               <script>
+                  document.addEventListener('DOMContentLoaded', () => {
+                    const settingsBtn = document.getElementById('settings-btn');
+                    const popup = document.getElementById('settings-popup');
+                    const closePopup = document.getElementById('close-popup');
+                  
+                    settingsBtn.addEventListener('click', (e) => {
+                      e.preventDefault();
+                      popup.classList.remove('pointer-events-none');
+                      popup.classList.add('bg-opacity-50');
+                      popup.classList.remove('opacity-0');
+                    });
+                  
+                    const hidePopup = () => {
+                      popup.classList.add('opacity-0');
+                      setTimeout(() => {
+                        popup.classList.remove('bg-opacity-50');
+                        popup.classList.add('pointer-events-none');
+                      }, 150);
+                    };
+                  
+                    closePopup.addEventListener('click', hidePopup);
+                  
+                    popup.addEventListener('click', (e) => {
+                      if (e.target === popup) {
+                        hidePopup();
+                      }
+                    });
+                  });
+               </script>
+               <div class="mt-6 pt-6 border-t border-[#3f3f3f]">
+                  <ul class="space-y-2">
+                     <li>
+                        <a href="#" id="settings-btn" class="flex items-center px-3 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                           </svg>
+                           <span class="ml-1">Settings</span>
+                        </a>
+                     </li>
+                     <li>
+                        <a id="exit-button" href="#" class="flex items-center px-4 py-3 text-gray-300 rounded-lg hover:bg-[#2e2e2e] duration-150 all">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                           </svg>
+                           <span>Exit</span>
+                        </a>
+                     </li>
+                  </ul>
+                  <script>
+                     document.getElementById('exit-button').addEventListener('click', () => {
+                         window.close();
+                     });
+                  </script>
+               </div>
+            </div>
+            <div class="flex-1 ml-12 flex">
+               <div class="flex-1 grid grid-cols-12 gap-6">
+                  <div class="col-span-7 flex flex-col gap-6">
+                     <!-- Game Status -->
+                     <div id="card-gamestatus" class="card p-6 mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">BGSI Tool</h1>
+                              <p class="text-gray-400 mt-1">Current informations from <span class="font-bold" id="game-title2">Loading...</span></p>
+                           </div>
+                        </div>
+                        <div class="flex flex-col xl:flex-row gap-4 max-h-[600px] xl:max-h-[300px]">
+                           <div class="flex items-center gap-2 w-full xl:w-[60%] 2xl:w-[45%] max-h-[350px]">
+                              <img src="icons/gamebanner.png" class="rounded-2xl w-full h-full object-cover">
+                           </div>
+                           <div class="flex flex-col justify-between h-full w-full xl:w-[40%] 2xl:w-[55%]">
+                              <div class="bg-[#2e2e2e] p-3 rounded-lg flex flex-col justify-between h-full">
+                                 <p id="game-title" class="2xl:text-3xl xl:text-2xl text-xl font-bold flex-grow">Game Title</p>
+                                 <p id="game-author" class="2xl:text-lg text-md text-gray-400 flex-grow">By Author</p>
+                              </div>
+                              <div class="bg-[#2e2e2e] p-3 mt-4 rounded-lg flex flex-row items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-2 mt-[1px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <circle cx="12" cy="13" r="2" stroke="currentColor" stroke-linejoin="round"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7.5C7.69517 7.5 4.47617 11.0833 3.39473 12.4653C3.14595 12.7832 3.14595 13.2168 3.39473 13.5347C4.47617 14.9167 7.69517 18.5 12 18.5C16.3048 18.5 19.5238 14.9167 20.6053 13.5347C20.8541 13.2168 20.8541 12.7832 20.6053 12.4653C19.5238 11.0833 16.3048 7.5 12 7.5Z" />
+                                 </svg>
+                                 <p id="game-online" class="text-lg">Online</p>
+                              </div>
+                              <div class="bg-[#2e2e2e] p-3 mt-4 rounded-lg flex flex-row items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-2 mt-[2px] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20" />
+                                 </svg>
+                                 <p id="game-likes" class="text-lg">Loading...</p>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="relative" style="margin-top: 30px;">
+                           <div class="absolute top-0 left-0 w-full h-1 bg-[#1a1a1a] rounded-t-lg overflow-hidden">
+                              <div id="progress-bar" class="h-full bg-[#d942fe] transition-all ease-in-out" style="width: 0%; height: 20px;"></div>
+                           </div>
+                           <div class="bg-[#2e2e2e] p-4 rounded-t-[4px] rounded-b-xl mb-4 flex items-center justify-between overflow-hidden">
+                              <div class="flex items-center">
+                                 <img src="icons/box.png" alt="Logo" class="h-[4.5rem] w-[4.5rem] mr-3 rounded-lg" />
+                                 <div>
+                                    <div class="font-semibold text-2xl">Mystery Box</div>
+                                    <div class="text-gray-400 text-md">Free x2 Mystery Box every 200 Likes</div>
+                                    <div id="counter" class="text-white text-sm font-bold">0/200</div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="text-center mt-5 hidden xl:block">
+                           <p id="game-desc1" class="font-bold text-lg">Header</p>
+                           <p id="game-desc2">Description</p>
+                        </div>
+                     </div>
+                     <!-- Enchanting menu -->
+                     <div id="card-autoenchant" class="card p-6 hidden">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">Auto Enchant</h1>
+                              <p class="text-gray-400 mt-1">Automatically enchant your pets with selected enchants</p>
+                           </div>
+                        </div>
+                        <div class="mb-4 flex flex-col md:flex-row md:space-x-4">
+                           <div class="flex-1 mb-4 md:mb-0">
+                              <label for="spoof-listselect" class="block text-sm font-medium text-gray-300 mb-1">Select Enchants</label>
+                              <div class="dropdown">
+                                 <div class="dropdown-btn" onclick="toggleDropdown()" id="dropdown-btn">Select Enchants</div>
+                                 <div id="dropdown-content" class="dropdown-content"></div>
+                              </div>
+                              <script>
+                                 document.addEventListener("DOMContentLoaded", () => {
+                                   const dropdown = document.getElementById("dropdown-content");
+                                   const dropdownBtn = document.getElementById("dropdown-btn");
+                                   const selectedValues = new Set();
+                                 
+                                   function toggleOption(element) {
+                                     const value = element.dataset.value;
+                                 
+                                     if (element.classList.contains("selected")) {
+                                       element.classList.remove("selected");
+                                       selectedValues.delete(value);
+                                     } else {
+                                       element.classList.add("selected");
+                                       selectedValues.add(value);
+                                     }
+                                 
+                                     updateDropdownText();
+                                   }
+                                 
+                                   function updateDropdownText() {
+                                     if (selectedValues.size === 0) {
+                                       dropdownBtn.textContent = "Select Enchants";
+                                     } else if (selectedValues.size === 1) {
+                                       const selectedElement = [...document.querySelectorAll(".dropdown-option")]
+                                         .find(el => selectedValues.has(el.dataset.value));
+                                       dropdownBtn.textContent = selectedElement?.textContent || "Select Enchants";
+                                     } else {
+                                       if (selectedValues.size >= 18) {
+                                         dropdownBtn.textContent = `Loss of potential :(`;
+                                       } else {
+                                         dropdownBtn.textContent = `${selectedValues.size} Enchants`;
+                                       }
+                                     }
+                                   }
+                                 
+                                   window.toggleOption = toggleOption;
+                                 
+                                   window.toggleDropdown = () => {
+                                     dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+                                   };
+                                   document.addEventListener("click", function (event) {
+                                     if (!dropdown.contains(event.target) && event.target !== dropdownBtn) {
+                                       dropdown.style.display = "none";
+                                     }
+                                   });
+                                 
+                                   const groupedOptions = {
+                                     "Bubbler": ["🫧 Bubbler I", "🫧 Bubbler II", "🫧 Bubbler III", "🫧 Bubbler IV", "🫧 Bubbler V"],
+                                     "Gleaming": ["✨ Gleaming I", "✨ Gleaming II", "✨ Gleaming III"],
+                                     "Looter": ["💰 Looter I", "💰 Looter II", "💰 Looter III", "💰 Looter IV", "💰 Looter V"],
+                                     "Team Up": ["⚡ Team Up I", "⚡ Team Up II", "⚡ Team Up III", "⚡ Team Up IV", "⚡ Team Up V"]
+                                   };
+                                 
+                                   Object.entries(groupedOptions).forEach(([groupName, options], index) => {
+                                     if (index !== 0) {
+                                       const separator = document.createElement("div");
+                                       separator.className = "dropdown-separator";
+                                       separator.textContent = "—————————";
+                                       separator.style.pointerEvents = "none";
+                                       separator.style.userSelect = "none";
+                                       separator.style.margin = "5px 0";
+                                       separator.style.color = "#999";
+                                       dropdown.appendChild(separator);
+                                     }
+                                 
+                                     options.forEach(option => {
+                                       const div = document.createElement("div");
+                                       div.className = "dropdown-option";
+                                       div.dataset.value = option.toLowerCase().replace(/\s+/g, '');
+                                       div.textContent = option;
+                                       div.setAttribute("onclick", "toggleOption(this)");
+                                       dropdown.appendChild(div);
+                                     });
+                                   });
+                                 });
+                                 function toggleDropdown() {
+                                   document.getElementById("dropdown-content").classList.toggle("show");
+                                 }
+                                 
+                                 function toggleOption(el) {
+                                   if (el.classList.contains('disabled')) return;
+                                 
+                                   el.classList.toggle('selected');
+                                 }
+                                 window.addEventListener('click', function(e) {
+                                   if (!e.target.closest('.dropdown')) {
+                                     document.getElementById("dropdown-content").classList.remove("show");
+                                   }
+                                 });
+                              </script>
+                           </div>
+                           <div class="flex-1">
+                              <label for="autoenchant-method" class="block text-sm font-medium text-gray-300 mb-1">Select Method</label>
+                              <select id="autoenchant-method" name="autoenchant-method"
+                                 class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]">
+                                 <option value="answer1">Fast</option>
+                                 <option value="answer-beta">Normal</option>
+                              </select>
+                           </div>
+                        </div>
+                        <div class="flex-1">
+                           <label for="autoenchant-method" class="block text-sm font-medium text-gray-300 mb-1">Select Roblox Window</label>
+                           <select id="autoenchant-method" name="autoenchant-method"
+                              class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]">
+                              <option value="answer1">Select Window</option>
+                           </select>
+                        </div>
+                        <div class="flex mb-4 md:mb-0 space-x-4 mt-5">
+                           <div class="flex-1">
+                              <label for="start-keybind" class="block text-sm font-medium text-gray-300 mb-1">Select Start Keybind</label>
+                              <input type="text" id="start-keybind" name="start-keybind"
+                                 class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]" readonly placeholder="Click to select keybind">
+                           </div>
+                           <div class="flex-1">
+                              <label for="stop-keybind" class="block text-sm font-medium text-gray-300 mb-1">Select Stop Keybind</label>
+                              <input type="text" id="stop-keybind" name="stop-keybind"
+                                 class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]" readonly placeholder="Click to select keybind">
+                           </div>
+                        </div>
+                        <script>
+                           function setKeybind(inputId) {
+                             const input = document.getElementById(inputId);
+                             let keysPressed = [];
+                             input.addEventListener('click', () => {
+                               keysPressed = [];
+                               input.addEventListener('keydown', (event) => {
+                                 event.preventDefault();
+                                 if (event.key === 'Shift' || event.key === 'Control' || event.key === 'Alt') {
+                                   if (!keysPressed.includes(event.key)) {
+                                     keysPressed.push(event.key);
+                                   }
+                                 } else {
+                                   if (!keysPressed.includes(event.key)) {
+                                     keysPressed.push(event.key);
+                                   }
+                                   input.value = keysPressed.join('+');
+                                   input.blur();
+                                   checkForMatchingKeybinds();
+                                 }
+                               });
+                             });
+                           }
+                           
+                           function checkForMatchingKeybinds() {
+                             const startKeybind = document.getElementById('start-keybind').value;
+                             const stopKeybind = document.getElementById('stop-keybind').value;
+                             const startInput = document.getElementById('start-keybind');
+                             const stopInput = document.getElementById('stop-keybind');
+                           
+                             if (startKeybind === stopKeybind) {
+                               startInput.style.borderColor = '#ff564a';
+                               stopInput.style.borderColor = '#ff564a';
+                             } else {
+                               startInput.style.borderColor = '#3f3f3f';
+                               stopInput.style.borderColor = '#3f3f3f';
+                             }
+                           }
+                           setKeybind('start-keybind');
+                           setKeybind('stop-keybind');
+                        </script>
+                        <div class="mt-8 pt-6 border-t border-[#3f3f3f]"></div>
+                        <div class="flex items-center justify-between flex-wrap gap-4 mt-2">
+                           <div class="flex items-center gap-3">
+                              <label class="toggle ml-auto">
+                              <input type="checkbox" id="log-progress-toggle">
+                              <span class="slider"></span>
+                              </label>
+                              <div class="flex flex-col flex-grow mr-6">
+                                 <span>Log Progress</span>
+                                 <small class="text-xs text-gray-400">Save information in Last Stats</small>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <!-- Egg Stats Menu -->
+                     <div id="card-eggstats" class="card p-6 hidden">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">Eggs Wiki</h1>
+                              <p class="text-gray-400 mt-1">Information automatically updated from the BGSI Fandom</p>
+                           </div>
+                        </div>
+                        <div id="scroll-container" class="max-h-[calc(100vh-252px)] mt-8 w-full overflow-y-scroll bg-[#1a1a1a] p-4 rounded-lg">
+                           <div id="items-wrapper" class="flex flex-wrap gap-2">
+                              <div id="loadCSS" class="bg-[#212121] text-white rounded shadow sm:w-[calc(50%-4px)] md:w-[calc(33%-6px)] lg:w-[calc(25%-6px)] xl:w-[calc(20%-7px)] 2xl:w-[calc(16%-3px)] aspect-square relative">
+                                 <p class="absolute top-2 left-0 right-0 hidden md:block md:text-[10px] lg:text-[12px] xl:text-[12px] 2xl:text-[15px] font-medium text-center" style="text-shadow: -1px -1px 0 rgba(0,0,0,1.4), 1px -1px 0 rgba(0,0,0,1.4), -1px 1px 0 rgba(0,0,0,1.4), 1px 1px 0 rgba(0,0,1,0.4);">
+                                    ???
+                                 </p>
+                                 <div class="w-full h-full flex items-center justify-center">
+                                    <img src="icons/egg.png" class="object-contain w-3/4 h-3/4" />
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                     <!-- Egg Calculator Menu -->
+                     <div id="card-eggcalculator" class="card p-6 hidden">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">Chances Calculator</h1>
+                              <p class="text-gray-400 mt-1">Calculate the chances of a pet dropping and the average time</p>
+                           </div>
+                        </div>
+                        <div class="mb-4 flex flex-col md:flex-row md:space-x-8">
+                           <div class="flex-1 mb-4 md:mb-0">
+                              <label for="eggcalculator-lucky" class="block text-sm font-medium text-gray-300 mb-1">Lucky</label>
+                              <input type="text" value="0%" id="eggcalculator-lucky" name="eggcalculator-lucky" placeholder="Lucky" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                           <div class="flex-1">
+                              <label for="eggcalculator-shiny" class="block text-sm font-medium text-gray-300 mb-1">Shiny Chance</label>
+                              <input type="text" value="1/100" id="eggcalculator-shiny" name="eggcalculator-shiny" placeholder="Shiny Chance" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                        </div>
+                        <div class="mb-4 flex flex-col md:flex-row md:space-x-8">
+                           <div class="flex-1 mb-4 md:mb-0">
+                              <label for="eggcalculator-mythic" class="block text-sm font-medium text-gray-300 mb-1">Mythic Chance</label>
+                              <input type="text" value="1/100" id="eggcalculator-mythic" name="eggcalculator-mythic" placeholder="Mythic Chance" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                           <div class="flex-1">
+                              <label for="eggcalculator-speed" class="block text-sm font-medium text-gray-300 mb-1">Hatch Speed</label>
+                              <input type="text" value="100%" id="eggcalculator-speed" name="eggcalculator-speed" placeholder="Hatch Speed" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-[#3f3f3f]"></div>
+                        <div class="mb-4 flex flex-col md:flex-row md:space-x-8">
+                           <div class="flex-1 mb-4 md:mb-0">
+                              <label for="eggcalculator-eggcount" class="block text-sm font-medium text-gray-300 mb-1">Egg Count</label>
+                              <input type="text" value="1" id="eggcalculator-eggcount" name="eggcalculator-eggcount" placeholder="Egg Count" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                           <div class="flex-1">
+                              <label for="eggcalculator-chance" class="block text-sm font-medium text-gray-300 mb-1">Pet Chance</label>
+                              <input type="text" value="1/100" id="eggcalculator-chance" name="eggcalculator-chance" placeholder="Pet Chance" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                        </div>
+                        <div class="flex justify-end w-full mt-8">
+                           <button id="start-calc" class="bg-[#1ea54c] w-[140px] disabled:bg-[#0d6129] disabled:text-gray-400 hover:bg-[#24c95d] text-white px-4 py-2 rounded-lg transition duration-150">
+                           Calculate
+                           </button>
+                        </div>
+                     </div>
+
+
+                     <!-- Fast Hatch Menu -->
+                     <div id="card-fasthatch" class="card p-6 hidden" style="border: 2px solid rgba(32, 155, 255, 0); transition: border-color 0.5s ease-in-out;">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">Fast Hatch</h1>
+                              <p class="text-gray-400 mt-1">Increases the speed at which you open eggs</p>
+                           </div>
+                        </div>
+                        <div class="flex mb-4 md:mb-0 space-x-4 mt-5">
+                           <div class="flex-1">
+                              <label for="fasthatch-keybind" class="block text-sm font-medium text-gray-300 mb-1">Select Start/Stop Keybind</label>
+                              <input type="text" id="fasthatch-keybind" name="fasthatch-keybind"
+                                    class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]" readonly placeholder="Click to select keybind">
+                           </div>
+                        </div>
+                        <div class="mb-4 flex flex-col md:flex-row md:space-x-8 mt-4">
+                           <div class="flex-1 mb-4 md:mb-0">
+                              <label for="fasthatch-speed" class="block text-sm font-medium text-gray-300 mb-1">Enter Speed</label>
+                              <input type="text" value="10" id="fasthatch-speed" name="fasthatch-speed" placeholder="Enter speed" class="w-full px-3 py-2 h-[45px] border border-[#3f3f3f] rounded-lg bg-[#212121] text-white focus:outline-none focus:ring-2 focus:ring-[#9ca3af]"/>
+                           </div>
+                        </div>
+
+                        <script>
+                           let ipcRenderer;
+                           try {
+                              const electron = window.require('electron');
+                              ipcRenderer = electron.ipcRenderer;
+                           } catch (e) {}
+                           
+                           let isRunning = false;
+                           const cardElement = document.getElementById('card-fasthatch');
+                           const cardElement2 = document.getElementById('fast-hatch');
+                           
+                           function startPulseAnimation() {
+                              if (isRunning) {
+                                 cardElement.style.borderColor = `rgba(32, 155, 255, 1)`;
+                                 cardElement2.style.borderColor = `rgba(32, 155, 255, 1)`;
+                              } else {
+                                 cardElement.style.borderColor = 'rgba(32, 155, 255, 0)';
+                                 cardElement2.style.borderColor = 'rgba(32, 155, 255, 0)';
+                              }
+                           }
+                           
+                           function updateStatusUI() {
+                              if (isRunning) {
+                                    cardElement.style.borderColor = 'rgba(32, 155, 255, 1)';
+                                    cardElement2.style.borderColor = 'rgba(32, 155, 255, 1)';
+                                    startPulseAnimation();
+                              } else {
+                                    if (window.pulseInterval) {
+                                       clearInterval(window.pulseInterval);
+                                    }
+                                    cardElement.style.borderColor = 'rgba(32, 155, 255, 0)';
+                                    cardElement2.style.borderColor = 'rgba(32, 155, 255, 0)';
+                              }
+                           }
+                           let isKeybindSelectionActive = false;
+
+                           function fastHatchKeybind(inputId) {
+                              const input = document.getElementById(inputId);
+                              let keysPressed = [];
+                              
+                              input.addEventListener('click', () => {
+                                    keysPressed = [];
+                                    const originalValue = input.value;
+                                    input.value = '';
+                                    
+                                    function handleKeyDown(event) {
+                                       event.preventDefault();
+                                       if (event.key === 'Shift' || event.key === 'Control' || event.key === 'Alt') {
+                                          if (!keysPressed.includes(event.key)) {
+                                                keysPressed.push(event.key);
+                                          }
+                                       } else {
+                                          if (!keysPressed.includes(event.key)) {
+                                                keysPressed.push(event.key);
+                                          }
+                                          finalizeKeybind();
+                                       }
+                                    }
+                                    
+                                    function handleMouseDown(event) {
+                                       event.preventDefault();
+                                       
+                                       if (event.button === 0) {
+                                          cancelKeybind(originalValue);
+                                          return;
+                                       } else if (event.button === 2) {
+                                          cancelKeybind(originalValue);
+                                          return;
+                                       }
+                                       
+                                       let buttonName = null;
+                                       
+                                       switch (event.button) {
+                                          case 1:
+                                                buttonName = "Scroll Click";
+                                                break;
+                                          case 3:
+                                                buttonName = "Mouse 4";
+                                                break;
+                                          case 4:
+                                                buttonName = "Mouse 5";
+                                                break;
+                                          default:
+                                                return;
+                                       }
+                                       
+                                       if (buttonName && !keysPressed.includes(buttonName)) {
+                                          keysPressed.push(buttonName);
+                                          finalizeKeybind();
+                                       }
+                                    }
+                                    
+                                    function finalizeKeybind() {
+                                       input.value = keysPressed.join('+');
+                                       input.blur();
+                                       removeEventListeners();
+                                       registerKeybind();
+                                    }
+                                    
+                                    function cancelKeybind(originalValue) {
+                                       input.value = originalValue;
+                                       input.blur();
+                                       removeEventListeners();
+                                    }
+                                    
+                                    function removeEventListeners() {
+                                       document.removeEventListener('keydown', handleKeyDown);
+                                       document.removeEventListener('mousedown', handleMouseDown);
+                                       document.removeEventListener('contextmenu', preventContextMenu);
+                                    }
+                                    
+                                    function preventContextMenu(event) {
+                                       event.preventDefault();
+                                       return false;
+                                    }
+                                    
+                                    document.addEventListener('keydown', handleKeyDown);
+                                    document.addEventListener('mousedown', handleMouseDown);
+                                    document.addEventListener('contextmenu', preventContextMenu);
+                              });
+                           }
+                           
+                           fastHatchKeybind('fasthatch-keybind');
+
+                           function togglePythonScript() {
+                              if (!ipcRenderer) {
+                                    return;
+                              }
+                              
+                              const speed = document.getElementById('fasthatch-speed').value;
+                              
+                              ipcRenderer.send('toggle-fasthatch-script', {
+                                    speed: parseInt(speed) || 10
+                              });
+                           }
+
+                           
+                           function setupMouseListener() {
+                              let pressedMouseButtons = [];
+                              let mouseButtonConfig = [];
+                              
+                              function checkMouseTrigger(button) {
+                                    const keybindValue = document.getElementById('fasthatch-keybind').value;
+                                    
+                                    if (mouseButtonConfig.length === 0) {
+                                       mouseButtonConfig = keybindValue.split('+');
+                                    }
+                                    
+                                    if (mouseButtonConfig.includes(button)) {
+                                       let allButtonsPressed = true;
+                                       for (const configButton of mouseButtonConfig) {
+                                          if (!pressedMouseButtons.includes(configButton) && 
+                                                configButton !== button) {
+                                                allButtonsPressed = false;
+                                                break;
+                                          }
+                                       }
+                                       
+                                       if (allButtonsPressed || mouseButtonConfig.length === 1) {
+                                          togglePythonScript();
+                                       }
+                                    }
+                              }
+                              
+                              document.addEventListener('mousedown', function(event) {
+                                    let buttonName = '';
+                                    
+                                    switch(event.button) {
+                                       case 3:
+                                          buttonName = 'Mouse 4';
+                                          break;
+                                       case 4:
+                                          buttonName = 'Mouse 5';
+                                          break;
+                                       default:
+                                          return;
+                                    }
+                                    
+                                    if (!pressedMouseButtons.includes(buttonName)) {
+                                       pressedMouseButtons.push(buttonName);
+                                    }
+                                    
+                                    checkMouseTrigger(buttonName);
+                              });
+                              
+                              document.addEventListener('mouseup', function(event) {
+                                    let buttonName = '';
+                                    
+                                    switch(event.button) {
+                                       case 0:
+                                          buttonName = 'Left Click';
+                                          break;
+                                       case 1:
+                                          buttonName = 'Scroll Click';
+                                          break;
+                                       case 2:
+                                          buttonName = 'Right Click';
+                                          break;
+                                       case 3:
+                                          buttonName = 'Mouse 4';
+                                          break;
+                                       case 4:
+                                          buttonName = 'Mouse 5';
+                                          break;
+                                       default:
+                                          return;
+                                    }
+                                    
+                                    const index = pressedMouseButtons.indexOf(buttonName);
+                                    if (index > -1) {
+                                       pressedMouseButtons.splice(index, 1);
+                                    }
+                              });
+                              
+                              document.getElementById('fasthatch-keybind').addEventListener('change', function() {
+                                 mouseButtonConfig = this.value.split('+');
+                              });
+                           }
+                           
+                           setupMouseListener();
+
+                           let registeredKeybind = '';
+                           
+                           function registerKeybind() {
+                              if (!ipcRenderer) {
+                                 return;
+                              }
+                              
+                              const keybind = document.getElementById('fasthatch-keybind').value;
+                              if (keybind && keybind !== registeredKeybind) {
+                                 ipcRenderer.send('register-fasthatch-keybind', keybind);
+                                 registeredKeybind = keybind;
+                              }
+                           }
+                           
+                           if (ipcRenderer) {
+                              ipcRenderer.on('fasthatch-keybind-triggered', () => {
+                                 togglePythonScript();
+                              });
+                              
+                              ipcRenderer.on('fasthatch-status-changed', (event, data) => {
+                                 isRunning = data.isRunning;
+                                 updateStatusUI();
+                              });
+                           }
+                           updateStatusUI();
+                        </script>
+                     </div>
+
+
+
+                     <!-- Result -->
+                     <div id="card-eggcalcresult" class="card p-6 hidden mb-6">
+                        <div class="flex justify-between items-start mb-4">
+                           <div>
+                              <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold">Chance Result</h1>
+                              <p class="text-gray-400 mt-1">Result from the given information</p>
+                           </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                           <div class="w-full bg-[#1a1a1a] p-3 pl-4 rounded-xl flex">
+                              <div class="flex items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3" fill="none" viewBox="0 0 24 24" stroke="none">
+                                    <path d="M1 2C1 1.44772 1.44772 1 2 1C2.55228 1 3 1.44772 3 2V20C3 20.5523 3.44771 21 4 21L22 21C22.5523 21 23 21.4477 23 22C23 22.5523 22.5523 23 22 23H3C1.89543 23 1 22.1046 1 21V2Z" fill="#9ca3af"/>
+                                    <path d="M19.9285 5.37139C20.1336 4.85861 19.8842 4.27664 19.3714 4.07152C18.8586 3.86641 18.2766 4.11583 18.0715 4.62861L14.8224 12.7513C14.6978 13.0628 14.3078 13.1656 14.0459 12.9561L11.0811 10.5843C10.3619 10.0089 9.29874 10.2116 8.84174 11.0114L5.13176 17.5039C4.85775 17.9834 5.02434 18.5942 5.50386 18.8682C5.98338 19.1423 6.59423 18.9757 6.86824 18.4961L9.9982 13.0187C10.1505 12.7521 10.5049 12.6846 10.7447 12.8764L13.849 15.3598C14.635 15.9886 15.805 15.6802 16.1788 14.7456L19.9285 5.37139Z" fill="#9ca3af"/>
+                                 </svg>
+                              </div>
+                              <div class="flex flex-col">
+                                 <span class="font-bold text-sm text-gray-300">Pet Chance</span>
+                                 <p id="result-normal">Chance</p>
+                              </div>
+                           </div>
+                           <div class="w-full bg-[#1a1a1a] p-3 pl-4 rounded-xl flex">
+                              <div class="flex items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3" fill="none" viewBox="0 0 22 22" stroke="none">
+                                    <path d="M11.245 4.174C11.4765 3.50808 11.5922 3.17513 11.7634 3.08285C11.9115 3.00298 12.0898 3.00298 12.238 3.08285C12.4091 3.17513 12.5248 3.50808 12.7563 4.174L14.2866 8.57639C14.3525 8.76592 14.3854 8.86068 14.4448 8.93125C14.4972 8.99359 14.5641 9.04218 14.6396 9.07278C14.725 9.10743 14.8253 9.10947 15.0259 9.11356L19.6857 9.20852C20.3906 9.22288 20.743 9.23007 20.8837 9.36432C21.0054 9.48051 21.0605 9.65014 21.0303 9.81569C20.9955 10.007 20.7146 10.2199 20.1528 10.6459L16.4387 13.4616C16.2788 13.5829 16.1989 13.6435 16.1501 13.7217C16.107 13.7909 16.0815 13.8695 16.0757 13.9507C16.0692 14.0427 16.0982 14.1387 16.1563 14.3308L17.506 18.7919C17.7101 19.4667 17.8122 19.8041 17.728 19.9793C17.6551 20.131 17.5108 20.2358 17.344 20.2583C17.1513 20.2842 16.862 20.0829 16.2833 19.6802L12.4576 17.0181C12.2929 16.9035 12.2106 16.8462 12.1211 16.8239C12.042 16.8043 11.9593 16.8043 11.8803 16.8239C11.7908 16.8462 11.7084 16.9035 11.5437 17.0181L7.71805 19.6802C7.13937 20.0829 6.85003 20.2842 6.65733 20.2583C6.49056 20.2358 6.34626 20.131 6.27337 19.9793C6.18915 19.8041 6.29123 19.4667 6.49538 18.7919L7.84503 14.3308C7.90313 14.1387 7.93218 14.0427 7.92564 13.9507C7.91986 13.8695 7.89432 13.7909 7.85123 13.7217C7.80246 13.6435 7.72251 13.5829 7.56262 13.4616L3.84858 10.6459C3.28678 10.2199 3.00588 10.007 2.97101 9.81569C2.94082 9.65014 2.99594 9.48051 3.11767 9.36432C3.25831 9.23007 3.61074 9.22289 4.31559 9.20852L8.9754 9.11356C9.176 9.10947 9.27631 9.10743 9.36177 9.07278C9.43726 9.04218 9.50414 8.99359 9.55657 8.93125C9.61593 8.86068 9.64887 8.76592 9.71475 8.57639L11.245 4.174Z" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                 </svg>
+                              </div>
+                              <div class="flex flex-col">
+                                 <span class="font-bold text-sm text-gray-300">Shiny Chance</span>
+                                 <p id="result-shiny">Chance</p>
+                              </div>
+                           </div>
+                           <div class="w-full bg-[#1a1a1a] p-3 pl-4 rounded-xl flex">
+                              <div class="flex items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3" fill="none" viewBox="0 0 24 24" stroke="none">
+                                    <path d="M12 3L14.0357 8.16153C14.2236 8.63799 14.3175 8.87622 14.4614 9.0771C14.5889 9.25516 14.7448 9.41106 14.9229 9.53859C15.1238 9.68245 15.362 9.77641 15.8385 9.96432L21 12L15.8385 14.0357C15.362 14.2236 15.1238 14.3175 14.9229 14.4614C14.7448 14.5889 14.5889 14.7448 14.4614 14.9229C14.3175 15.1238 14.2236 15.362 14.0357 15.8385L12 21L9.96432 15.8385C9.77641 15.362 9.68245 15.1238 9.53859 14.9229C9.41106 14.7448 9.25516 14.5889 9.0771 14.4614C8.87622 14.3175 8.63799 14.2236 8.16153 14.0357L3 12L8.16153 9.96432C8.63799 9.77641 8.87622 9.68245 9.0771 9.53859C9.25516 9.41106 9.41106 9.25516 9.53859 9.0771C9.68245 8.87622 9.77641 8.63799 9.96432 8.16153L12 3Z" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                 </svg>
+                              </div>
+                              <div class="flex flex-col">
+                                 <span class="font-bold text-sm text-gray-300">Mythic Chance</span>
+                                 <p id="result-mythic">Chance</p>
+                              </div>
+                           </div>
+                           <div class="w-full bg-[#1a1a1a] p-3 pl-4 rounded-xl flex">
+                              <div class="flex items-center">
+                                 <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3 text-gray-400" fill="currentColor" viewBox="85 7678 21 21" stroke="none">
+                                    <path transform="translate(3, 0)" d="M94,7697 C90.692,7697 88,7694.308 88,7691 C88,7686.268 91.39,7681 93.688,7681 C96.539,7681 100,7687.241 100,7691 C100,7694.308 97.308,7697 94,7697 M93.688,7679 C89.27,7679 86,7686.582 86,7691 C86,7695.418 89.582,7699 94,7699 C98.418,7699 102,7695.418 102,7691 C102,7686.582 98.106,7679 93.688,7679" id="egg-[#86]"></path>
+                                 </svg>
+                              </div>
+                              <div class="flex flex-col">
+                                 <span class="font-bold text-sm text-gray-300">Required Eggs</span>
+                                 <p id="result-eggs">Eggs</p>
+                              </div>
+                           </div>
+                        </div>
+                        <div class="w-full bg-[#1a1a1a] p-3 pl-4 mt-4 rounded-xl flex">
+                           <div class="flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon mr-3" fill="none" viewBox="0 0 24 24" stroke="none">
+                                 <path d="M12 8V12L15 15" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+                                 <circle cx="12" cy="12" r="9" stroke="#9ca3af" stroke-width="2"/>
+                              </svg>
+                           </div>
+                           <div class="flex flex-col">
+                              <span class="font-bold text-sm text-gray-300">Average Time</span>
+                              <p id="result-time">Time</p>
+                           </div>
+                        </div>
+                     </div>
+                     <script>
+                        const calculateButton = document.getElementById('start-calc');
+                        const resultCard = document.getElementById('card-eggcalcresult');
+                        const calculatorCard = document.getElementById('card-eggcalculator');
+                        
+                        const resultNormal = document.getElementById('result-normal');
+                        const resultShiny = document.getElementById('result-shiny');
+                        const resultMythic = document.getElementById('result-mythic');
+                        const resultEggs = document.getElementById('result-eggs');
+                        const resultTime = document.getElementById('result-time');
+                        
+                        const luckyInput = document.getElementById('eggcalculator-lucky');
+                        const shinyChanceInput = document.getElementById('eggcalculator-shiny');
+                        const mythicChanceInput = document.getElementById('eggcalculator-mythic');
+                        const hatchSpeedInput = document.getElementById('eggcalculator-speed');
+                        const eggCountInput = document.getElementById('eggcalculator-eggcount');
+                        const petChanceInput = document.getElementById('eggcalculator-chance');
+                        
+                        const DEFAULT_HATCH_SPEED = 5;
+                        
+                        function parsePercentage(percentage) {
+                            if (percentage.includes('%')) {
+                                return parseFloat(percentage.replace('%', '')) / 100;
+                            }
+                            return parseFloat(percentage) / 100;
+                        }
+                        
+                        function parseFraction(value) {
+                            value = value.trim();
+                        
+                            if (value.includes('/')) {
+                                const [numerator, denominator] = value.split('/').map(part => parseFloat(part));
+                                if (!isNaN(numerator) && !isNaN(denominator) && denominator !== 0) {
+                                    return numerator / denominator;
+                                }
+                                return 0;
+                            }
+                        
+                            if (value.includes('%')) {
+                                const percentValue = parseFloat(value.replace('%', ''));
+                                return percentValue / 100;
+                            }
+                        
+                            const numericValue = parseFloat(value);
+                            if (!isNaN(numericValue)) {
+                                if (numericValue > 1) {
+                                    return numericValue / 100;
+                                }
+                                return numericValue;
+                            }
+                        
+                            return 0;
+                        }
+                        
+                        function formatAsFraction(decimal) {
+                            if (decimal >= 1) {
+                                return "100%";
+                            }
+                        
+                            const denominator = Math.round(1 / decimal);
+                            return `1/${denominator}`;
+                        }
+                        function formatPercentage(decimal) {
+                           const percentage = decimal * 100;
+                        
+                           if (Number.isInteger(percentage)) {
+                              return `${percentage}%`;
+                           } else if (percentage >= 1) {
+                              return `${percentage.toFixed(2)}%`;
+                           } else if (percentage >= 0.01) {
+                              return `${parseFloat(percentage.toFixed(4))}%`;
+                           } else {
+                              return `${percentage.toExponential(2)}%`;
+                           }
+                        }
+                        
+                        calculateButton.addEventListener('click', function() {
+                            resultCard.classList.remove('hidden');
+                            resultCard.classList.add('block');
+                        
+                            const lucky = parsePercentage(luckyInput.value);
+                            const shinyChance = parseFraction(shinyChanceInput.value);
+                            const mythicChance = parseFraction(mythicChanceInput.value);
+                            const hatchSpeed = parsePercentage(hatchSpeedInput.value);
+                            const eggCount = parseInt(eggCountInput.value);
+                            const petChance = parseFraction(petChanceInput.value);
+                        
+                            const luckyMultiplier = 1 + lucky;
+                            const adjustedPetChance = petChance * luckyMultiplier;
+                            const adjustedShinyChance = petChance * shinyChance * luckyMultiplier;
+                            const adjustedMythicChance = petChance * mythicChance * luckyMultiplier;
+                        
+                            const eggsNeeded = Math.round(1 / (adjustedPetChance));
+                        
+                            const timePerEgg = DEFAULT_HATCH_SPEED / hatchSpeed;
+                            const totalTimeSeconds = (eggsNeeded * timePerEgg)/eggCount;
+                        
+                            const days = Math.floor(totalTimeSeconds / 86400);
+                            const hours = Math.floor((totalTimeSeconds % 86400) / 3600);
+                            const minutes = Math.floor((totalTimeSeconds % 3600) / 60);
+                            const seconds = Math.floor(totalTimeSeconds % 60);
+                        
+                            let timeString = '';
+                            if (days > 0) timeString += `${days}d `;
+                            if (hours > 0 || days > 0) timeString += `${hours}h `;
+                            if (minutes > 0 || hours > 0 || days > 0) timeString += `${minutes}m `;
+                            timeString += `${seconds}s`;
+                        
+                            resultNormal.textContent = `${formatAsFraction(adjustedPetChance)} (${formatPercentage(adjustedPetChance)})`;
+                            resultShiny.textContent = `${formatAsFraction(adjustedShinyChance)} (${formatPercentage(adjustedShinyChance)})`;
+                            resultMythic.textContent = `${formatAsFraction(adjustedMythicChance)} (${formatPercentage(adjustedMythicChance)})`;
+                        
+                            resultEggs.textContent = eggsNeeded.toLocaleString();
+                            resultTime.textContent = timeString;
+                        });
+                     </script>
+                  </div>
+                  <div id="card-laststats" class="col-span-5 card p-6 flex flex-col rounded-xl h-[95vh]">
+                     <h1 class="xl:text-4xl lg:text-3xl text-2xl font-bold mb-2">Last Stats</h1>
+                     <p class="text-gray-400 mb-6">Last data sent or received from Minecraft Servers during your activity
+                     <p>
+                     <div class="scrollable-list max-h-[calc(100vh-200px)] overflow-y-auto pr-4 rounded-xl">
+                        <table class="w-full">
+                           <thead class="sticky top-0 bg-[#212121] z-10">
+                              <tr class="text-left text-gray-400">
+                                 <th class="pb-3">Status</th>
+                                 <th class="pb-3">Label</th>
+                                 <th class="pb-3">Progress</th>
+                              </tr>
+                           </thead>
+                           <tbody id="last-stats">
+                              <tr class="h-12">
+                              </tr>
+                           </tbody>
+                        </table>
+                     </div>
+                  </div>
+               </div>
+               <script>
+                  let licznik = 1;
+                  
+                  function dodajElement() {
+                    const tbody = document.getElementById("tabelaBody");
+                    let ostatniWiersz = tbody.lastElementChild;
+                  
+                    if (!ostatniWiersz || ostatniWiersz.children.length >= 3) {
+                      ostatniWiersz = document.createElement("tr");
+                      tbody.appendChild(ostatniWiersz);
+                    }
+                  
+                    const td = document.createElement("td");
+                    td.className = "border border-[#212121] px-4 py-2 bg-[#1a1a1a]";
+                    td.textContent = `Element ${licznik++}`;
+                    ostatniWiersz.appendChild(td);
+                  }
+               </script>
+            </div>
+         </div>
+         </div>
+      </body>
+   </html>

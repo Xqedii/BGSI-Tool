@@ -1,0 +1,10 @@
+node_modules
+dist
+.log
+output.css
+.exe
+.dll
+.zip
+.DS_Store
+.old
+!release/MCNetTool.exe
